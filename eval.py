@@ -41,8 +41,6 @@ def parse_opt(known=False):
     
     return parser.parse_known_args()[0] if known else parser.parse_args()
 
-from torchvision import transforms
-
 def channelsAndstd(image):
     color_index = np.sum(np.sum(image, axis=0), axis=0)/ image.shape[0]/ image.shape[1]
     color_std = np.std(color_index, axis=0)
