@@ -36,6 +36,7 @@ def parse_opt(known=False):
     parser.add_argument('--device', default='0', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--input', default=path_dict['input'], help='input folder')
     parser.add_argument('--gt', default=path_dict['gt'], help='gt folder')
+    parser.add_argument('--resize', default=0, help='save result to path')
     parser.add_argument('--save_dir', default='./res/', help='save result to path')
     
     return parser.parse_known_args()[0] if known else parser.parse_args()
@@ -47,9 +48,12 @@ def channelsAndstd(image):
     color_std = np.std(color_index, axis=0)
     return color_index, color_std
 
-def cast(image):
+def cast(image, resize):
     #array = np.array(image).astype(np.float32)/255.
+    resize = int(resize)
     array = ToTensor()(np.array(image))
+    if resize != 0:
+        array = Resize((resize, resize))(array)
     array = array.unsqueeze(0)
     return array
 
@@ -75,8 +79,8 @@ def main(opt, device):  # hyp is path/to/hyp.yaml or hyp dictionary
         print(file)
 
         input, gt = Image.open(input_path / file),  Image.open(gt_path / file) # Image.open(gt_path / str(file.split('_')[0] + '.png'))
-        input = cast(input)
-        gt = cast(gt)
+        input = cast(input, opt.resize)
+        gt = cast(gt, opt.resize)
         metrics(input, gt)
         #print(channelsAndstd(input))
         log.metricsWriter(_, metrics.back())
