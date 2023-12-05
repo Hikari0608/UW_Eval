@@ -1,5 +1,5 @@
 from torch import Tensor
-from .base import SSIM
+from .Ref import SSIM
 
 import torch
 import torch.nn as nn

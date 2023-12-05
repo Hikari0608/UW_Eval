@@ -2,8 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-
-from .base import SSIM, CLAHE, calc_uciqe, calc_uiqm
 from .losses import baseLoss
 
 
@@ -60,26 +58,7 @@ class Metrics(baseLoss):
         return res
 
 
-class NegMetric(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.Negmetrics = []
 
-    def cast(self, tensor:torch.Tensor):
-        tensor = (tensor * 255).clamp(0, 255).to(torch.uint8)
-        image_np = tensor.permute(0, 2, 3, 1).squeeze().cpu().numpy()
-        return image_np
-    
-    def forward(self, input, target):
-        x = self.cast(input)
-        res = {**calc_uiqm(x), **calc_uciqe(x)}
-        for _, lossfunc in enumerate(self.Negmetrics):
-            loss = lossfunc(x)
-            if isinstance(loss, dict):
-                res = {**res, **loss}
-            else:
-                res[lossfunc._get_name()] = loss
-        return res
 
 
 

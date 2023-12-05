@@ -9,7 +9,7 @@ import os
 import argparse
 import platform
 from core.monitor import Monitor
-from core.Losses import (Metrics, PSNR, SSIM, NegMetric)
+from core.Losses import (Metrics, PSNR, SSIM, CustomMetric)
 from torchvision.transforms import ToTensor, Resize
 
 from PIL import Image
@@ -28,7 +28,7 @@ RANK = int(os.getenv('RANK', -1))
 
 def parse_opt(known=False):
     path_dict = {
-        'input': r'/share/zhangdan2013/p/增强test/增强test/output',
+        'input': r'/share/zhangdan2013/code/torch-nn/Trainer/img/ALL/val',
         'gt': r'/share/zhangdan2013/code/datasets/UIEB_end/val/target'
     }
 
@@ -36,7 +36,7 @@ def parse_opt(known=False):
     parser.add_argument('--device', default='0', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--input', default=path_dict['input'], help='input folder')
     parser.add_argument('--gt', default=path_dict['gt'], help='gt folder')
-    parser.add_argument('--resize', default=0, help='save result to path')
+    parser.add_argument('--resize', default=0, help='resize pixel')
     parser.add_argument('--save_dir', default='./res/', help='save result to path')
     
     return parser.parse_known_args()[0] if known else parser.parse_args()
@@ -64,7 +64,7 @@ def main(opt, device):  # hyp is path/to/hyp.yaml or hyp dictionary
     gt_path = Path(opt.gt)
 
     metrics = Metrics()
-    metrics.add([PSNR(), SSIM(), NegMetric()])
+    metrics.add([PSNR(), SSIM(), CustomMetric()])
     
     filenames = os.listdir(opt.input)
     filenames = [x for x in filenames if x.endswith(('jpg', 'png', 'jpeg'))]
@@ -76,7 +76,7 @@ def main(opt, device):  # hyp is path/to/hyp.yaml or hyp dictionary
     for _, file in enumerate(filenames):
         print(file)
 
-        input, gt = Image.open(input_path / file),  Image.open(gt_path / file) # Image.open(gt_path / str(file.split('_')[0] + '.png'))
+        input, gt = Image.open(input_path / file),  Image.open(gt_path / file) # Image.open(gt_path / ('(' + str(file.split('_')[0] + ')' + '.png')))
         input = cast(input, opt.resize)
         gt = cast(gt, opt.resize)
         metrics(input, gt)
