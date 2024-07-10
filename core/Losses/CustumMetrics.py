@@ -20,7 +20,7 @@ class CustomMetric(nn.Module):
     def forward(self, input, target):
         x = self.cast(input)
         res = {**calc_uiqm(x), **calc_uciqe(x)}
-        self.add_metric_per(input.device)
+        #self.add_metric_per(input.device)
         for _, lossfunc in enumerate(self.NoRefMetrics):
             loss = lossfunc
             if isinstance(loss, nn.Module):
